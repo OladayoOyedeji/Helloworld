@@ -45,7 +45,7 @@ jobs:
       - name: Prepare deploy folder
         run: |
           mkdir -p deploy
-          cp build/Helloworldhtml deploy/index.html
+          cp build/Helloworld.html deploy/index.html
           cp build/Helloworld.js deploy/
           cp build/Helloworld.wasm deploy/
           cp build/qtloader.js deploy/ 2>/dev/null || true
