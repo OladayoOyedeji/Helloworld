@@ -27,6 +27,13 @@ jobs:
       - name: Fix Qt tool permissions
         run: chmod +x "${QT_ROOT_DIR}/bin/"*
 
+      - name: Install Emscripten
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git
+          cd emsdk
+          ./emsdk install 3.1.50
+          ./emsdk activate 3.1.50
+          
       - name: Configure and build
         run: |
           mkdir build && cd build
