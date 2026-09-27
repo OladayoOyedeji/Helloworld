@@ -34,7 +34,7 @@ jobs:
           ./emsdk install 3.1.50
           ./emsdk activate 3.1.500
           echo "EMSDK=$PWD" >> $GITHUB_ENV
-          echo "$PWD/upstream/emscripten" >> $GITHUB_PATH
+          echo "$PWD/upstream/emscripten" >> $GITHUB_PATH 
           
       - name: Configure and build
         run: |
