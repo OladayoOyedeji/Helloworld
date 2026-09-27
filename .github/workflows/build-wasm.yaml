@@ -24,6 +24,8 @@ jobs:
           version: '6.7.3'
           target: 'wasm'
           arch: 'wasm_singlethread'
+      - name: Fix Qt tool permissions
+        run: chmod +x "${QT_ROOT_DIR}/bin/"*
 
       - name: Configure and build
         run: |
