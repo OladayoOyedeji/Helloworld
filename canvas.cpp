@@ -1,9 +1,28 @@
 #include "canvas.h"
 
+#include <iostream>
+
 Canvas::Canvas(QWidget *parent)
     : QOpenGLWidget(parent)
 {
-    andGate.setPosition(300, 500);
+    setFocusPolicy(Qt::StrongFocus);
+
+    gates.push_back(new AndGate());
+    gates.push_back(new OrGate());
+    gates.push_back(new NotGate());
+
+    gates[0]->setPosition(300, 500);
+    gates[1]->setPosition(500, 500);
+    gates[2]->setPosition(700, 500);
+
+    // ---- MOVE CAMERA ----
+    cameraTimer.setInterval(16);
+
+    connect(&cameraTimer, &QTimer::timeout,
+            this, &Canvas::updateCamera);
+
+    cameraTimer.start();
+    // ---- MOVE CAMERA ----
 }
 
 double Canvas::screenToWorldX(double screenX) const
@@ -26,7 +45,40 @@ double Canvas::worldToScreenY(double worldY) const
 
 double Canvas::snapToGrid(double value)
 {
-    return std::floor(value/gridsize) * gridsize;
+    return std::round(value/gridsize) * gridsize;
+}
+
+void Canvas::updateCamera()
+{
+    double speed = 5.0;
+
+    if (wPressed)
+        cameraY -= speed / zoom;
+    if (aPressed)
+        cameraX -= speed / zoom;
+    if (sPressed)
+        cameraY += speed / zoom;
+    if (dPressed)
+        cameraX += speed / zoom;
+
+    update();
+}
+
+void Canvas::placeGate(Gate *newGate)
+{
+    mousePosition = mapFromGlobal(QCursor::pos());
+
+    double worldX = screenToWorldX(mousePosition.x());
+    double worldY = screenToWorldY(mousePosition.y());
+
+    worldX = snapToGrid(worldX);
+    worldY = snapToGrid(worldY);
+
+    newGate->setPosition(snapToGrid(worldX), snapToGrid(worldY));
+
+    gates.push_back(newGate);
+
+    update();
 }
 
 void Canvas::drawGrid(QPainter &painter)
@@ -72,10 +124,22 @@ void Canvas::paintGL()
     // Draw Wires
 
     // Draw Gates
-    double screenX = worldToScreenX(andGate.getX());
-    double screenY = worldToScreenY(andGate.getY());
 
-    andGate.draw(painter, screenX, screenY, zoom);
+    double screenX;
+    double screenY;
+
+
+    for(Gate *gate : gates)
+    {
+        double screenX = worldToScreenX(gate->getX());
+        double screenY = worldToScreenY(gate->getY());
+
+        gate->draw(painter, screenX, screenY, zoom);
+
+        std::cout << "Drawing Gate" << '\n';
+        gate->get_gate();
+        std::cout << "X pos: " << gate->getX() << " Y pos: " << gate->getY() << '\n';
+    }
 
     // Draw I/O pins
 }
@@ -88,18 +152,27 @@ void Canvas::resizeGL(int width, int height)
 
 void Canvas::mousePressEvent(QMouseEvent *event)
 {
+    mousePosition = event->position();
+
+    setFocus();
+
     if(event->button() == Qt::LeftButton)
     {
         double worldX = screenToWorldX(event->position().x());
         double worldY = screenToWorldY(event->position().y());
 
-        if(andGate.contains(worldX, worldY))
+        for(Gate *gate : gates)
         {
-            draggingGate = true;
+            if(gate->contains(worldX, worldY))
+            {
+                selectedGate = gate;
+                draggingGate = true;
 
-            dragOffset.setX(worldX - andGate.getX());
-            dragOffset.setY(worldY - andGate.getY());
+                dragOffset.setX(worldX - gate->getX());
+                dragOffset.setY(worldY - gate->getY());
 
+                break;
+            }
         }
     }
 
@@ -108,34 +181,12 @@ void Canvas::mousePressEvent(QMouseEvent *event)
         panning = true;
         lastMousePosition = event->pos();
     }
-
-    // Change the panning to WASD later
-    /*
-    switch(event)
-    {
-    case Qt::Key_W:
-        panning = true;
-        lastMousePosition = event->pos();
-        break;
-    case Qt::Key_A:
-        panning = true;
-        lastMousePosition = event->pos();
-        break;
-    case Qt::Key_S:
-        panning = true;
-        lastMousePosition = event->pos();
-        break;
-    case Qt::Key_D:
-        panning = true;
-        lastMousePosition = event->pos();
-        break;
-    }
-    */
-
 }
 
 void Canvas::mouseMoveEvent(QMouseEvent *event)
 {
+    mousePosition = event->position();
+
     if(draggingGate)
     {
         double worldX = screenToWorldX(event->position().x());
@@ -148,7 +199,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         double snapX = std::round(worldX / gridsize) * gridsize;
         double snapY = std::round(worldY / gridsize) * gridsize;
 
-        andGate.setPosition(snapX, snapY);
+        selectedGate->setPosition(snapX, snapY);
 
         update();
     }
@@ -179,7 +230,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *event)
 
 void Canvas::wheelEvent(QWheelEvent *event)
 {
-    QPointF mousePosition = event->position();
+    mousePosition = event->position();
 
     double worldX = screenToWorldX(mousePosition.x());
     double worldY = screenToWorldY(mousePosition.y());
@@ -197,4 +248,47 @@ void Canvas::wheelEvent(QWheelEvent *event)
     cameraY = worldY - mousePosition.y() / zoom;
 
     update();
+}
+
+void Canvas::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_1)
+    {
+        Gate *newGate = new AndGate;
+
+        placeGate(newGate);
+    }
+    if (event->key() == Qt::Key_2)
+    {
+        Gate *newGate = new OrGate;
+
+        placeGate(newGate);
+    }
+    if (event->key() == Qt::Key_3)
+    {
+        Gate *newGate = new NotGate;
+
+        placeGate(newGate);
+    }
+
+    if(event->key() == Qt::Key_W)
+        wPressed = true;
+    if(event->key() == Qt::Key_A)
+        aPressed = true;
+    if(event->key() == Qt::Key_S)
+        sPressed = true;
+    if(event->key() == Qt::Key_D)
+        dPressed = true;
+}
+
+void Canvas::keyReleaseEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_W)
+        wPressed = false;
+    if (event->key() == Qt::Key_A)
+        aPressed = false;
+    if (event->key() == Qt::Key_S)
+        sPressed = false;
+    if (event->key() == Qt::Key_D)
+        dPressed = false;
 }

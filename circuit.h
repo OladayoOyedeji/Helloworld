@@ -10,6 +10,8 @@ public:
     virtual ~Circuit() = default;
 
     virtual void draw(QPainter &painter, double screenX, double screenY, double zoom) = 0;
+    virtual bool contains(double worldX, double worldY) const = 0;
+    virtual void get_gate() = 0;
 
     double getX() const;
     double getY() const;

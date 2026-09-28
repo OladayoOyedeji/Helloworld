@@ -6,8 +6,13 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include <QWheelEvent>
+#include <QKeyEvent>
+#include <QTimer>
+#include <QCursor>
+
 #include <cmath>
 #include <algorithm>
+#include <vector>
 
 #include "gates.h"
 
@@ -19,6 +24,7 @@ class Canvas : public QOpenGLWidget,
 public:
     Canvas(QWidget * parent = NULL);
 
+
     void drawGrid(QPainter&);
 
     double screenToWorldX(double) const;
@@ -28,6 +34,12 @@ public:
     double worldToScreenY(double) const;
 
     double snapToGrid(double);
+
+    // ---- MOVE TO CAMERA CLASS LATER ----
+    void updateCamera();
+    // ---- MOVE TO CAMERA CLASS LATER ----
+
+    void placeGate(Gate*);
 
 protected:
     void initializeGL() override;
@@ -39,20 +51,34 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
 
 private:
+    // ---- MOVE TO CAMERA CLASS LATER ----
     double zoom = 1.0;
     double cameraX = 0.0;
     double cameraY = 0.0;
+
+    QTimer cameraTimer;
+    // ---- MOVE TO CAMERA CLASS LATER ----
 
     const double gridsize = 25;
 
     bool panning = false;
     bool draggingGate = false;
+    Gate *selectedGate = NULL;
     QPoint lastMousePosition;
     QPoint dragOffset;
 
-    AndGate andGate;
+    bool wPressed = false;
+    bool aPressed = false;
+    bool sPressed = false;
+    bool dPressed = false;
+
+    std::vector<Gate*> gates;
+
+    QPointF mousePosition;
 };
 
 #endif // CANVAS_H
