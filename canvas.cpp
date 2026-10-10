@@ -1,5 +1,7 @@
 #include "canvas.h"
- 
+#include "wire.h"
+#include "gates.h"
+
 #include <iostream>
 
 Canvas::Canvas(QWidget *parent)
@@ -81,6 +83,26 @@ void Canvas::placeGate(Gate *newGate)
     update();
 }
 
+Port *Canvas::findport(double worldX, double worldY)
+{
+    for(Gate *gate : gates)
+    {
+        for(Port *port : gate->getInputPorts())
+        {
+            if(port->contains(worldX, worldY))
+                return port;
+        }
+
+        for(Port *port : gate->getOutputPorts())
+        {
+            if(port->contains(worldX, worldY))
+                return port;
+        }
+    }
+
+    return NULL;
+}
+
 void Canvas::drawGrid(QPainter &painter)
 {
     QPen gridPen(QColor(60, 60, 60));
@@ -114,20 +136,24 @@ void Canvas::initializeGL()
 
 void Canvas::paintGL()
 {
+    QPainter painter(this);
+
     // Draw Background
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Draw Grid
-    QPainter painter(this);
     drawGrid(painter);
 
     // Draw Wires
+    for(Wire *wire : wires)
+        drawWire(painter, wire);
+
+    if(drawingWire)
+        drawTempWire(painter);
 
     // Draw Gates
-
     double screenX;
     double screenY;
-
 
     for(Gate *gate : gates)
     {
@@ -136,9 +162,14 @@ void Canvas::paintGL()
 
         gate->draw(painter, screenX, screenY, zoom);
 
-        std::cout << "Drawing Gate" << '\n';
-        gate->get_gate();
-        std::cout << "X pos: " << gate->getX() << " Y pos: " << gate->getY() << '\n';
+        for(Port *port : gate->getInputPorts())
+        {
+            drawPort(painter, port);
+        }
+        for(Port *port : gate->getOutputPorts())
+        {
+            drawPort(painter, port);
+        }
     }
 
     // Draw I/O pins
@@ -150,16 +181,86 @@ void Canvas::resizeGL(int width, int height)
     glViewport(0, 0, width, height);
 }
 
+void Canvas::drawPort(QPainter &painter, Port *port)
+{
+    double screenX = worldToScreenX(port->getX());
+    double screenY = worldToScreenY(port->getY());
+
+    double radius = 5.0 * zoom;
+
+    painter.drawEllipse(QPointF(screenX, screenY), radius, radius);
+}
+
+void Canvas::drawWire(QPainter &painter, Wire *wire)
+{
+    QPen gridPen(QColor(0, 125, 125));
+    painter.setPen(gridPen);
+
+    Port *start = wire->getStart();
+    Port *end = wire->getEnd();
+
+    double x1 = worldToScreenX(start->getX());
+    double y1 = worldToScreenY(start->getY());
+
+    double x2 = worldToScreenX(end->getX());
+    double y2 = worldToScreenY(end->getY());
+
+    painter.drawLine(QPointF(x1, y1), QPointF(x2, y2));
+}
+
+void Canvas::drawTempWire(QPainter &painter)
+{
+    QPen gridPen(QColor(0, 125, 125));
+    painter.setPen(gridPen);
+
+    if(wireStart == NULL)
+        return;
+
+    double startX = worldToScreenX(wireStart->getX());
+    double startY = worldToScreenY(wireStart->getY());
+
+    painter.drawLine(QPointF(startX, startY), mousePosition);
+}
+
 void Canvas::mousePressEvent(QMouseEvent *event)
 {
     mousePosition = event->position();
 
     setFocus();
 
+    double worldX = screenToWorldX(event->position().x());
+    double worldY = screenToWorldY(event->position().y());
+
     if(event->button() == Qt::LeftButton)
     {
-        double worldX = screenToWorldX(event->position().x());
-        double worldY = screenToWorldY(event->position().y());
+        Port *clickedPort = findport(worldX, worldY);
+
+        if(clickedPort != NULL)
+        {
+            // Start wire
+            if(!drawingWire && clickedPort->getType() == PortType::OUTPUT)
+            {
+                wireStart = clickedPort;
+                drawingWire = true;
+
+                update();
+                return;
+            }
+
+            // Finish wire
+            if(drawingWire && clickedPort->getType() == PortType::INPUT)
+            {
+                Wire *newWire = new Wire(wireStart, clickedPort);
+
+                wires.push_back(newWire);
+
+                wireStart = NULL;
+                drawingWire = false;
+
+                update();
+                return;
+            }
+        }
 
         for(Gate *gate : gates)
         {
@@ -186,6 +287,9 @@ void Canvas::mousePressEvent(QMouseEvent *event)
 void Canvas::mouseMoveEvent(QMouseEvent *event)
 {
     mousePosition = event->position();
+
+    if(drawingWire)
+        update();
 
     if(draggingGate)
     {
@@ -223,7 +327,10 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
 void Canvas::mouseReleaseEvent(QMouseEvent *event)
 {
     if(event->button() == Qt::LeftButton)
+    {
         draggingGate = false;
+
+    }
     if (event->button() == Qt::MiddleButton)
         panning = false;
 }

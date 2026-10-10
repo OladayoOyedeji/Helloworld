@@ -27,6 +27,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         circuit.h circuit.cpp
         gate.h gate.cpp
         gates.h
+        port.h port.cpp
+        wire.h wire.cpp
+        wire.h wire.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Logisimp APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

@@ -14,7 +14,10 @@
 #include <algorithm>
 #include <vector>
 
-#include "gates.h"
+#include "port.h"
+
+class Wire;
+class Port;
 
 class Canvas : public QOpenGLWidget,
                protected QOpenGLFunctions
@@ -41,10 +44,15 @@ public:
 
     void placeGate(Gate*);
 
+    Port *findport(double, double);
+
 protected:
     void initializeGL() override;
     void paintGL() override;
     void resizeGL(int width, int height) override;
+    void drawPort(QPainter&, Port*);
+    void drawWire(QPainter&, Wire*);
+    void drawTempWire(QPainter&);
 
     // Control Events
     void mousePressEvent(QMouseEvent *event) override;
@@ -76,7 +84,11 @@ private:
     bool sPressed = false;
     bool dPressed = false;
 
+    Port *wireStart = NULL;
+    bool drawingWire = false;
+
     std::vector<Gate*> gates;
+    std::vector<Wire*> wires;
 
     QPointF mousePosition;
 };

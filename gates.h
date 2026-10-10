@@ -2,6 +2,7 @@
 #define GATES_H
 
 #include "gate.h"
+#include "port.h"
 
 class AndGate : public Gate
 {
@@ -9,6 +10,10 @@ public:
     AndGate()
     {
         numInputs = 2;
+
+        inputPorts.push_back(new Port(this, -width / 2, -12, PortType::INPUT));
+        inputPorts.push_back(new Port(this, -width / 2, 12, PortType::INPUT));
+        inputPorts.push_back(new Port(this, width / 2, 0, PortType::OUTPUT));
     }
 
     void draw(QPainter &painter, double screenX, double screenY, double zoom) override
@@ -45,6 +50,10 @@ public:
     OrGate()
     {
         numInputs = 2;
+
+        inputPorts.push_back(new Port(this, -width / 2, -12, PortType::INPUT));
+        inputPorts.push_back(new Port(this, -width / 2, 12, PortType::INPUT));
+        inputPorts.push_back(new Port(this, width / 2, 0, PortType::OUTPUT));
     }
 
     void draw(QPainter &painter, double screenX, double screenY, double zoom) override
@@ -81,6 +90,9 @@ public:
     NotGate()
     {
         numInputs = 1;
+
+        inputPorts.push_back(new Port(this, -width / 2, 0, PortType::INPUT));
+        inputPorts.push_back(new Port(this, width / 2, 0, PortType::OUTPUT));
     }
 
     void draw(QPainter &painter, double screenX, double screenY, double zoom) override
