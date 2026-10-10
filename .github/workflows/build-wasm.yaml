@@ -47,7 +47,7 @@ jobs:
           printf '/*\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp\n' > deploy/_headers
 
       - name: Deploy to Netlify
-        run: 
+        run: |
           echo "Site ID length: ${#NETLIFY_SITE_ID}"
           npx netlify-cli deploy --dir=deploy --prod --no-build
         env:
