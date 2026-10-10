@@ -1,5 +1,5 @@
 #include "canvas.h"
-
+ 
 #include <iostream>
 
 Canvas::Canvas(QWidget *parent)
