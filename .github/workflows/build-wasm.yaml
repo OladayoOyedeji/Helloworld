@@ -3,17 +3,8 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: 'pages'
-  cancel-in-progress: false
-
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,6 +15,7 @@ jobs:
           version: '6.7.3'
           target: 'wasm'
           arch: 'wasm_singlethread'
+
       - name: Fix Qt tool permissions
         run: chmod +x "${QT_ROOT_DIR}/bin/"*
 
@@ -34,33 +26,28 @@ jobs:
           ./emsdk install 3.1.50
           ./emsdk activate 3.1.50
           echo "EMSDK=$PWD" >> $GITHUB_ENV
-          echo "$PWD/upstream/emscripten" >> $GITHUB_PATH 
-          
+          echo "$PWD/upstream/emscripten" >> $GITHUB_PATH
+
       - name: Configure and build
         run: |
-          mkdir build && cd build
-          qt-cmake ..
-          cmake --build . --parallel 2
+          qt-cmake -S . -B build
+          cmake --build build --parallel 2
+
+      - name: List build output
+        run: find build -maxdepth 2 -type f \( -name "*.html" -o -name "*.js" -o -name "*.wasm" -o -name "*.svg" \)
 
       - name: Prepare deploy folder
         run: |
           mkdir -p deploy
-          cp build/Logisimp.html deploy/index.html
-          cp build/Logisimp.js deploy/
-          cp build/Logisimp.wasm deploy/
+          cp build/logisimp.html deploy/index.html
+          cp build/logisimp.js deploy/
+          cp build/logisimp.wasm deploy/
           cp build/qtloader.js deploy/ 2>/dev/null || true
           cp build/qtlogo.svg deploy/ 2>/dev/null || true
+          printf '/*\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp\n' > deploy/_headers
 
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: deploy
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy to Netlify
+        run: npx netlify-cli deploy --dir=deploy --prod --no-build
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
