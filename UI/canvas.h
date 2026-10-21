@@ -1,3 +1,38 @@
+/**
+ * @file canvas.h
+ * @author Ethan Graham
+ * @date 10/16/2026
+ * @brief This declares the interactive circuit workspace
+ */
+
+/**
+ * @class Canvas
+ * @brief This class provides an interactive graphical workspace
+ *        for circuit components
+ *
+ * @details
+ * Canvas is responsible for displaying and managing the
+ * GUI for the workspace of the logic simulator
+ *
+ * The program uses QOpenGLWidget OpenGl rendering
+ * and QPainter for drawing the grid and circuit elements
+ *
+ * Current Features include:
+ * - Rendering a grid-based workspace
+ * - Displaying AND, OR, and NOT gates
+ * - Dragging a gate using the leftmouse button
+ * - Panning the grid using either the middle mouse button
+ *   or using the WASD keys
+ * - Zooming in and out toward the mouse cursor
+ *
+ * @note Circuit simulation logic is not yet integrated into
+ *       the graphical user interface
+ *
+ * @see Circuit
+ * @see Gate
+ * @see Gates
+ */
+
 #ifndef CANVAS_H
 #define CANVAS_H
 
@@ -15,6 +50,7 @@
 #include <vector>
 
 #include "port.h"
+#include "spritesheet.h"
 
 class Wire;
 class Port;
@@ -25,11 +61,25 @@ class Canvas : public QOpenGLWidget,
     Q_OBJECT
 
 public:
+    /**
+     * @brief Canvas constructor
+     *
+     *Initializes the canvas
+     *and for now initializes an AND, OR, and NOT gate
+     *
+     * @param parent Parent QWidget
+     */
     Canvas(QWidget * parent = NULL);
 
 
+    /**
+     *
+     */
     void drawGrid(QPainter&);
 
+    /**
+     *
+     */
     double screenToWorldX(double) const;
     double screenToWorldY(double) const;
 
@@ -38,12 +88,21 @@ public:
 
     double snapToGrid(double);
 
+    /**
+     *
+     */
     // ---- MOVE TO CAMERA CLASS LATER ----
     void updateCamera();
     // ---- MOVE TO CAMERA CLASS LATER ----
 
+    /**
+     *
+     */
     void placeGate(Gate*);
 
+    /**
+     *
+     */
     Port *findport(double, double);
 
 protected:
@@ -63,6 +122,8 @@ protected:
     void keyReleaseEvent(QKeyEvent *event) override;
 
 private:
+    Spritesheet spriteSheet;
+
     // ---- MOVE TO CAMERA CLASS LATER ----
     double zoom = 1.0;
     double cameraX = 0.0;

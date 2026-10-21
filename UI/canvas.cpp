@@ -5,7 +5,8 @@
 #include <iostream>
 
 Canvas::Canvas(QWidget *parent)
-    : QOpenGLWidget(parent)
+    : QOpenGLWidget(parent),
+    spriteSheet("resources/Logisimp-spritesheet.png")
 {
     setFocusPolicy(Qt::StrongFocus);
 
@@ -35,7 +36,6 @@ double Canvas::screenToWorldY(double screenY) const
 {
     return screenY / zoom + cameraY;
 }
-
 double Canvas::worldToScreenX(double worldX) const
 {
     return (worldX - cameraX) * zoom;
@@ -160,7 +160,7 @@ void Canvas::paintGL()
         double screenX = worldToScreenX(gate->getX());
         double screenY = worldToScreenY(gate->getY());
 
-        gate->draw(painter, screenX, screenY, zoom);
+        gate->draw(painter, spriteSheet, screenX, screenY, zoom);
 
         for(Port *port : gate->getInputPorts())
         {
@@ -193,7 +193,7 @@ void Canvas::drawPort(QPainter &painter, Port *port)
 
 void Canvas::drawWire(QPainter &painter, Wire *wire)
 {
-    QPen gridPen(QColor(0, 125, 125));
+    QPen gridPen(QColor(255, 125, 125));
     painter.setPen(gridPen);
 
     Port *start = wire->getStart();
@@ -242,7 +242,7 @@ void Canvas::mousePressEvent(QMouseEvent *event)
             {
                 wireStart = clickedPort;
                 drawingWire = true;
-
+                // circuit.connect(pinB, input)
                 update();
                 return;
             }
@@ -362,19 +362,16 @@ void Canvas::keyPressEvent(QKeyEvent *event)
     if (event->key() == Qt::Key_1)
     {
         Gate *newGate = new AndGate;
-
         placeGate(newGate);
     }
     if (event->key() == Qt::Key_2)
     {
         Gate *newGate = new OrGate;
-
         placeGate(newGate);
     }
     if (event->key() == Qt::Key_3)
     {
         Gate *newGate = new NotGate;
-
         placeGate(newGate);
     }
 

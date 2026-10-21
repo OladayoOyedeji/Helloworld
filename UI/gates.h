@@ -3,6 +3,7 @@
 
 #include "gate.h"
 #include "port.h"
+#include "spritesheet.h"
 
 class AndGate : public Gate
 {
@@ -13,11 +14,18 @@ public:
 
         inputPorts.push_back(new Port(this, -width / 2, -12, PortType::INPUT));
         inputPorts.push_back(new Port(this, -width / 2, 12, PortType::INPUT));
-        inputPorts.push_back(new Port(this, width / 2, 0, PortType::OUTPUT));
+        outputPorts.push_back(new Port(this, width / 2, 0, PortType::OUTPUT));
     }
 
-    void draw(QPainter &painter, double screenX, double screenY, double zoom) override
+    void draw(QPainter &painter, Spritesheet &sprites, double screenX, double screenY, double zoom) override
     {
+        double drawWidth = width * zoom;
+        double drawHeight = height * zoom;
+
+        sprites.drawSprite(painter, 0, 0,
+                           screenX - drawWidth / 2, screenY - drawHeight / 2,
+                            drawWidth, drawHeight);
+
         QPen gridPen(QColor(0, 0, 250));
 
         painter.setPen(gridPen);
@@ -37,11 +45,6 @@ public:
                worldY >= y - height / 2.0 &&
                worldY <= y + height / 2.0;
     }
-
-    void get_gate()
-    {
-        std::cout << "And Gate" << '\n';
-    }
 };
 
 class OrGate : public Gate
@@ -53,11 +56,18 @@ public:
 
         inputPorts.push_back(new Port(this, -width / 2, -12, PortType::INPUT));
         inputPorts.push_back(new Port(this, -width / 2, 12, PortType::INPUT));
-        inputPorts.push_back(new Port(this, width / 2, 0, PortType::OUTPUT));
+        outputPorts.push_back(new Port(this, width / 2, 0, PortType::OUTPUT));
     }
 
-    void draw(QPainter &painter, double screenX, double screenY, double zoom) override
+    void draw(QPainter &painter, Spritesheet &sprites, double screenX, double screenY, double zoom) override
     {
+        double drawWidth = width * zoom;
+        double drawHeight = height * zoom;
+
+        sprites.drawSprite(painter, 0, 1,
+                           screenX - drawWidth / 2, screenY - drawHeight / 2,
+                           drawWidth, drawHeight);
+
         QPen gridPen(QColor(0, 250, 0));
 
         painter.setPen(gridPen);
@@ -77,11 +87,6 @@ public:
                worldY >= y - height / 2.0 &&
                worldY <= y + height / 2.0;
     };
-
-    void get_gate()
-    {
-        std::cout << "Or Gate" << '\n';
-    }
 };
 
 class NotGate : public Gate
@@ -92,11 +97,18 @@ public:
         numInputs = 1;
 
         inputPorts.push_back(new Port(this, -width / 2, 0, PortType::INPUT));
-        inputPorts.push_back(new Port(this, width / 2, 0, PortType::OUTPUT));
+        outputPorts.push_back(new Port(this, width / 2, 0, PortType::OUTPUT));
     }
 
-    void draw(QPainter &painter, double screenX, double screenY, double zoom) override
+    void draw(QPainter &painter, Spritesheet &sprites, double screenX, double screenY, double zoom) override
     {
+        double drawWidth = width * zoom;
+        double drawHeight = height * zoom;
+
+        sprites.drawSprite(painter, 0, 2,
+                           screenX - drawWidth / 2, screenY - drawHeight / 2,
+                           drawWidth, drawHeight);
+
         QPen gridPen(QColor(250, 0, 0));
 
         painter.setPen(gridPen);
@@ -115,11 +127,6 @@ public:
                worldX <= x + width / 2.0 &&
                worldY >= y - height / 2.0 &&
                worldY <= y + height / 2.0;
-    }
-
-    void get_gate()
-    {
-        std::cout << "Not Gate" << '\n';
     }
 };
 

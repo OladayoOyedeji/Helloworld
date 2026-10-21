@@ -1,6 +1,8 @@
 #ifndef CIRCUIT_H
 #define CIRCUIT_H
 
+#include "spritesheet.h"
+
 #include <QPainter>
 
 class Circuit
@@ -9,9 +11,9 @@ public:
     //Circuit();
     virtual ~Circuit() = default;
 
-    virtual void draw(QPainter &painter, double screenX, double screenY, double zoom) = 0;
+    //virtual void draw(QPainter &painter, double screenX, double screenY, double zoom) = 0;
+    virtual void draw(QPainter &painter, Spritesheet &sprites, double screenX, double screenY, double zoom) = 0;
     virtual bool contains(double worldX, double worldY) const = 0;
-    virtual void get_gate() = 0;
 
     double getX() const;
     double getY() const;

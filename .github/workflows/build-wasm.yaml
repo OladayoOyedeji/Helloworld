@@ -14,7 +14,7 @@ jobs:
         with:
           version: '6.7.3'
           target: 'wasm'
-          arch: 'wasm_singlethread'
+          arch: 'wasm_multithread'
 
       - name: Fix Qt tool permissions
         run: chmod +x "${QT_ROOT_DIR}/bin/"*
@@ -30,7 +30,7 @@ jobs:
 
       - name: Configure and build
         run: |
-          qt-cmake -S . -B build
+          qt-cmake -S UI -B build
           cmake --build build --parallel 2
 
       - name: List build output
@@ -39,17 +39,14 @@ jobs:
       - name: Prepare deploy folder
         run: |
           mkdir -p deploy
-          cp build/Logisimp.html deploy/index.html
-          cp build/Logisimp.js deploy/
-          cp build/Logisimp.wasm deploy/
+          cp build/logisimp.html deploy/index.html
+          cp build/logisimp.js deploy/
+          cp build/logisimp.wasm deploy/
           cp build/qtloader.js deploy/ 2>/dev/null || true
           cp build/qtlogo.svg deploy/ 2>/dev/null || true
           printf '/*\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp\n' > deploy/_headers
 
       - name: Deploy to Netlify
-        run: |
-          echo "Site ID length: ${#NETLIFY_SITE_ID}"
-          npx netlify-cli deploy --dir=deploy --prod --no-build
+        run: npx netlify-cli deploy --dir=deploy --prod --no-build --site ${{ secrets.NETLIFY_SITE_ID }}
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
