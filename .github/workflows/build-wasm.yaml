@@ -39,9 +39,9 @@ jobs:
       - name: Prepare deploy folder
         run: |
           mkdir -p deploy
-          cp build/logisimp.html deploy/index.html
-          cp build/logisimp.js deploy/
-          cp build/logisimp.wasm deploy/
+          cp build/Logisimp.html deploy/index.html
+          cp build/Logisimp.js deploy/
+          cp build/Logisimp.wasm deploy/
           cp build/qtloader.js deploy/ 2>/dev/null || true
           cp build/qtlogo.svg deploy/ 2>/dev/null || true
           printf '/*\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp\n' > deploy/_headers
