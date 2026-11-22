@@ -14,19 +14,19 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets OpenGLWidgets)
 
 # Logic engine located one directory above UI
 file(GLOB LOGIC_SOURCES CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/../backend/src/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../src/*.cpp"
 )
 
 # Exclude standalone programs and old tests
 list(REMOVE_ITEM LOGIC_SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/../backend/src/main.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../backend/src/Test.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../src/main.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../src/Test.cpp"
 )
 
 add_library(logic_engine STATIC ${LOGIC_SOURCES})
 
 target_include_directories(logic_engine PUBLIC
-    "${CMAKE_CURRENT_SOURCE_DIR}/../backend/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../include"
 )
 
 set(PROJECT_SOURCES
@@ -47,7 +47,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         port.h port.cpp
         wire.h wire.cpp
         spritesheet.h spritesheet.cpp
-		circuitcontroller.h circuitcontroller.cpp	
+	circuitcontroller.h circuitcontroller.cpp
+	camera.h camera.cpp
     )
 
 # Define target properties for Android with Qt 6 as:

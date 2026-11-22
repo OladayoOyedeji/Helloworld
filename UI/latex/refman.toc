@@ -56,4 +56,3 @@
 \contentsline {section}{\numberline {5.7}port.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{32}{section.5.7}%
 \contentsline {section}{\numberline {5.8}spritesheet.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{32}{section.5.8}%
 \contentsline {section}{\numberline {5.9}wire.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{32}{section.5.9}%
-\contentsline {chapter}{Index}{35}{section*.46}%

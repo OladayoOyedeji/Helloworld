@@ -47,7 +47,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         UI/port.h UI/port.cpp
         UI/wire.h UI/wire.cpp
         UI/spritesheet.h UI/spritesheet.cpp
-		UI/circuitcontroller.h UI/circuitcontroller.cpp	
+	UI/circuitcontroller.h UI/circuitcontroller.cpp
+        UI/camera.h UI/camera.cpp
     )
 
 # Define target properties for Android with Qt 6 as:
