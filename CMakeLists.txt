@@ -68,7 +68,15 @@ else()
         )
     endif()
 endif()
+file(GLOB_RECURSE APP_RESOURCES CONFIGURE_DEPENDS
+    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources/*"
+)
 
+qt_add_resources(Logisimp "app_resources"
+    PREFIX "/"
+    FILES ${APP_RESOURCES}
+)
 target_link_libraries(Logisimp PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::OpenGLWidgets
